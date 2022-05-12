@@ -9,8 +9,11 @@ WINDOW = pygame.display.set_mode((WIDTH, HEIGHT))
  #Sim Window
 simWindow = pygame.Rect(50, 50, 400, 400)
 
-#Sample count
+#Constants
 SAMPLE_COUNT = 500
+IMMUNITY = 100
+INFECT_TIME = 10
+COOL_DOWN_TIME = 5
 
 #Color constants
 COLOR_GRAY = (125, 125, 125)
@@ -34,12 +37,24 @@ class Sample:
     def __init__(self, stat, pos):
         self.stat = stat
         self.pos = pos
+        self.coolDown = 0
     
     def changeStat(self, newStat):
         self.stat = newStat
     
     def move(self, newPOS):
         self.pos = newPOS
+    
+    def updateSample(self):
+        if self.stat == Status.NEW_INFECT:
+            self.stat =  Status.INFECTED
+            self.coolDown = INFECT_TIME
+        elif self.stat == Status.INFECTED or self.stat == Status.COOL_DOWN:
+            self.coolDown -= 1
+            if self.coolDown == 0:
+                self.stat = Status.COOL_DOWN
+            elif self.coolDown == COOL_DOWN_TIME * -1:
+                self.stat = Status.CLEAN
 
 def distance(infectedPos, infecteePos):
     return (sqrt((infectedPos[0]-infecteePos[0]) ** 2 +(infectedPos[1]-infecteePos[1]) ** 2)).real
@@ -70,7 +85,7 @@ def moveSample(sample):
     elif range == 3 and sample.pos[1] < 445: #Down
         sample.move((sample.pos[0], sample.pos[1] + 2))
 
-def buildSamples(immunized):
+def buildSamples():
     sampleMap = []
     usedLocs = {}
     while len(sampleMap) < SAMPLE_COUNT:
@@ -85,7 +100,7 @@ def buildSamples(immunized):
                 if len(sampleMap) == 0:
                     usedLocs.update({(x,y): True})
                     sampleMap.append(Sample(Status.INFECTED, (x,y)))
-                elif len(sampleMap) <= immunized:
+                elif len(sampleMap) <= IMMUNITY:
                     usedLocs.update({(x,y): True})
                     sampleMap.append(Sample(Status.IMMUNIZED, (x,y)))
                 else:
@@ -98,7 +113,7 @@ def buildSamples(immunized):
 def main():
     run = True
 
-    samples = buildSamples(60)
+    samples = buildSamples()
     mouse = [-1,-1]
 
     #Game Loop
@@ -111,6 +126,8 @@ def main():
             elif event.type == pygame.MOUSEBUTTONUP:
                 mousePos = pygame.mouse.get_pos()
                 if 600 <= mousePos[0] <= 700 and 100 <= mousePos[1] <= 150:
+                    for sample in samples:
+                        sample.updateSample()
                     for sample in samples:
                         moveSample(sample)
                     sample = infect(samples)
