@@ -15,6 +15,7 @@ COLOR_BLACK = (0,0,0)
 COLOR_CYAN = (60, 223, 223)
 COLOR_RED = (255, 0, 0)
 COLOR_BLUE = (0, 0, 255)
+COLOR_GREEN = (0, 255, 0)
 
 pygame.display.set_caption("Contagion Sim")
 
@@ -35,19 +36,27 @@ class Sample:
     def move(self, newPOS):
         self.pos = newPOS
 
-def buildSamples():
-    sampleMap = {}
+def buildSamples(immunized):
+    sampleMap = []
+    usedLocs = {}
     while len(sampleMap) < 100:
         entered = False
         while entered == False:
             x = randint(50, 448)
             y = randint(50, 448)
             try:
-                a = sampleMap.get((x,y)).pos
-                entered = False
+                a = usedLocs[(x,y)]
             except:
                 entered = True
-                sampleMap.update({(x,y): Sample(Status.CLEAN, (x,y))})
+                if len(sampleMap) == 0:
+                    usedLocs.update({(x,y): True})
+                    sampleMap.append(Sample(Status.INFECTED, (x,y)))
+                elif len(sampleMap) <= immunized:
+                    usedLocs.update({(x,y): True})
+                    sampleMap.append(Sample(Status.IMMUNIZED, (x,y)))
+                else:
+                    usedLocs.update({(x,y): True})
+                    sampleMap.append(Sample(Status.CLEAN, (x,y)))
     
     return sampleMap
 
@@ -55,10 +64,7 @@ def buildSamples():
 def main():
     run = True
 
-    sampleList = buildSamples()
-    sampleRect = []
-    for pos in sampleList:
-        sampleRect.append(pygame.Rect(sampleList[pos].pos[0], sampleList[pos].pos[1], 2, 2))
+    samples = buildSamples(60)
 
     #Game Loop
     while(run):
@@ -68,16 +74,26 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
         
+        sampleRect = []
+        for num in range(100):
+            sampleRect.append(pygame.Rect(samples[num].pos[0], samples[num].pos[1], 2, 2))
 
         #Drawing to screen
         WINDOW.fill(COLOR_GRAY)
         pygame.Surface.fill(WINDOW, COLOR_BLACK, simWindow)
 
-        for rect in sampleRect:
-            pygame.Surface.fill(WINDOW, COLOR_BLUE, rect)
+        for num in range(100):
+            if samples[num].stat == Status.INFECTED:
+               pygame.Surface.fill(WINDOW, COLOR_RED, sampleRect[num])
+            elif samples[num].stat == Status.IMMUNIZED:
+               pygame.Surface.fill(WINDOW, COLOR_CYAN, sampleRect[num])
+            elif samples[num].stat == Status.COOL_DOWN:
+               pygame.Surface.fill(WINDOW, COLOR_GREEN, sampleRect[num])
+            else:
+               pygame.Surface.fill(WINDOW, COLOR_BLUE, sampleRect[num]) 
 
         pygame.display.update()
-
+    
 #Call main function
 if __name__ == "__main__":
     main()
