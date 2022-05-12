@@ -11,9 +11,10 @@ simWindow = pygame.Rect(50, 50, 400, 400)
 
 #Constants
 SAMPLE_COUNT = 500
-IMMUNITY = 100
-INFECT_TIME = 10
+IMMUNITY = 60
+INFECT_TIME = 7
 COOL_DOWN_TIME = 5
+DEATH_RATE = 4
 
 #Color constants
 COLOR_GRAY = (125, 125, 125)
@@ -73,7 +74,6 @@ def infect(sampleList):
                     elif dist < 20 and infectChance < 30:
                         infectee.changeStat(Status.NEW_INFECT)
 
-
 def moveSample(sample):
     range = randint(0,3)
     if range == 0 and sample.pos[0] < 445: #Right
@@ -128,19 +128,26 @@ def main():
                 if 600 <= mousePos[0] <= 700 and 100 <= mousePos[1] <= 150:
                     for sample in samples:
                         sample.updateSample()
+                        rng = randint(0, 99)
+                        deathChance = 100 * ((DEATH_RATE/(100 * (INFECT_TIME + 1 - sample.coolDown))))
+                        if sample.stat == Status.INFECTED:
+                            print("RNG: " + str(rng))
+                            print("Odds of death: " + str(deathChance))
+                        if sample.stat == Status.INFECTED and rng < deathChance:
+                            samples.remove(sample)
                     for sample in samples:
                         moveSample(sample)
                     sample = infect(samples)
         
         sampleRect = []
-        for num in range(SAMPLE_COUNT):
+        for num in range(len(samples)):
             sampleRect.append(pygame.Rect(samples[num].pos[0], samples[num].pos[1], 2, 2))
 
         #Drawing to screen
         WINDOW.fill(COLOR_GRAY)
         pygame.Surface.fill(WINDOW, COLOR_BLACK, simWindow)
 
-        for num in range(SAMPLE_COUNT):
+        for num in range(len(samples)):
             if samples[num].stat == Status.INFECTED:
                pygame.Surface.fill(WINDOW, COLOR_RED, sampleRect[num])
             elif samples[num].stat == Status.IMMUNIZED:
@@ -157,6 +164,9 @@ def main():
         pygame.Surface.fill(WINDOW, COLOR_BLACK, moveButton)
 
         pygame.display.update()
+
+        if run is False:
+            print(len(samples))
     
 #Call main function
 if __name__ == "__main__":
