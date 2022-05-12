@@ -1,4 +1,4 @@
-from asyncio.windows_events import NULL
+from cmath import sqrt
 from random import randint, random
 import pygame
 
@@ -19,6 +19,7 @@ COLOR_CYAN = (60, 223, 223)
 COLOR_RED = (255, 0, 0)
 COLOR_BLUE = (0, 0, 255)
 COLOR_GREEN = (0, 255, 0)
+COLOR_PURPLE = (200, 0, 200)
 
 pygame.display.set_caption("Contagion Sim")
 
@@ -27,6 +28,7 @@ class Status:
     INFECTED = 1
     IMMUNIZED = 2
     COOL_DOWN = 3
+    NEW_INFECT = 4
 
 class Sample:
     def __init__(self, stat, pos):
@@ -39,15 +41,33 @@ class Sample:
     def move(self, newPOS):
         self.pos = newPOS
 
+def distance(infectedPos, infecteePos):
+    return (sqrt((infectedPos[0]-infecteePos[0]) ** 2 +(infectedPos[1]-infecteePos[1]) ** 2)).real
+
+def infect(sampleList):
+    for infector in sampleList:
+        if infector.stat == Status.INFECTED:
+            for infectee in sampleList:
+                if infectee.stat == Status.CLEAN:
+                    infectChance = randint(0, 99)
+                    dist = distance(infector.pos, infectee.pos)
+                    if dist < 5 and infectChance < 70:
+                        infectee.changeStat(Status.NEW_INFECT)
+                    elif dist < 10 and infectChance < 45:
+                        infectee.changeStat(Status.NEW_INFECT)
+                    elif dist < 20 and infectChance < 30:
+                        infectee.changeStat(Status.NEW_INFECT)
+
+
 def moveSample(sample):
     range = randint(0,3)
-    if range == 0 and sample.pos[0] < 446: #Right
-        sample.move((sample.pos[0] + 2, sample.pos[1]))
-    elif range == 1 and sample.pos[0] > 53: #Left
-        sample.move((sample.pos[0] - 2, sample.pos[1]))
-    elif range == 2 and sample.pos[1] > 53: #Up
+    if range == 0 and sample.pos[0] < 445: #Right
+        sample.move((sample.pos[0] + 3, sample.pos[1]))
+    elif range == 1 and sample.pos[0] > 54: #Left
+        sample.move((sample.pos[0] - 3, sample.pos[1]))
+    elif range == 2 and sample.pos[1] > 54: #Up
         sample.move((sample.pos[0], sample.pos[1] - 2))
-    elif range == 3 and sample.pos[1] < 446: #Down
+    elif range == 3 and sample.pos[1] < 445: #Down
         sample.move((sample.pos[0], sample.pos[1] + 2))
 
 def buildSamples(immunized):
@@ -90,11 +110,10 @@ def main():
                 run = False
             elif event.type == pygame.MOUSEBUTTONUP:
                 mousePos = pygame.mouse.get_pos()
-                print(mousePos)
                 if 600 <= mousePos[0] <= 700 and 100 <= mousePos[1] <= 150:
-                    print("move")
                     for sample in samples:
                         moveSample(sample)
+                    sample = infect(samples)
         
         sampleRect = []
         for num in range(SAMPLE_COUNT):
@@ -111,6 +130,8 @@ def main():
                pygame.Surface.fill(WINDOW, COLOR_CYAN, sampleRect[num])
             elif samples[num].stat == Status.COOL_DOWN:
                pygame.Surface.fill(WINDOW, COLOR_GREEN, sampleRect[num])
+            elif samples[num].stat == Status.NEW_INFECT:
+               pygame.Surface.fill(WINDOW, COLOR_PURPLE, sampleRect[num])  
             else:
                pygame.Surface.fill(WINDOW, COLOR_BLUE, sampleRect[num])
         
