@@ -11,10 +11,11 @@ simWindow = pygame.Rect(50, 50, 400, 400)
 
 #Constants
 SAMPLE_COUNT = 500
-IMMUNITY = 60
+IMMUNITY = 100
 INFECT_TIME = 7
 COOL_DOWN_TIME = 5
 DEATH_RATE = 4
+SPREAD_RATE = 70
 
 #Color constants
 COLOR_GRAY = (125, 125, 125)
@@ -67,11 +68,11 @@ def infect(sampleList):
                 if infectee.stat == Status.CLEAN:
                     infectChance = randint(0, 99)
                     dist = distance(infector.pos, infectee.pos)
-                    if dist < 5 and infectChance < 70:
+                    if dist < 5 and infectChance < SPREAD_RATE:
                         infectee.changeStat(Status.NEW_INFECT)
-                    elif dist < 10 and infectChance < 45:
+                    elif dist < 15 and infectChance < SPREAD_RATE/2:
                         infectee.changeStat(Status.NEW_INFECT)
-                    elif dist < 20 and infectChance < 30:
+                    elif dist < 30 and infectChance < SPREAD_RATE/4:
                         infectee.changeStat(Status.NEW_INFECT)
 
 def moveSample(sample):
@@ -100,6 +101,7 @@ def buildSamples():
                 if len(sampleMap) == 0:
                     usedLocs.update({(x,y): True})
                     sampleMap.append(Sample(Status.INFECTED, (x,y)))
+                    sampleMap[0].coolDown = INFECT_TIME
                 elif len(sampleMap) <= IMMUNITY:
                     usedLocs.update({(x,y): True})
                     sampleMap.append(Sample(Status.IMMUNIZED, (x,y)))
@@ -128,16 +130,14 @@ def main():
                 if 600 <= mousePos[0] <= 700 and 100 <= mousePos[1] <= 150:
                     for sample in samples:
                         sample.updateSample()
-                        rng = randint(0, 99)
-                        deathChance = 100 * ((DEATH_RATE/(100 * (INFECT_TIME + 1 - sample.coolDown))))
                         if sample.stat == Status.INFECTED:
-                            print("RNG: " + str(rng))
-                            print("Odds of death: " + str(deathChance))
-                        if sample.stat == Status.INFECTED and rng < deathChance:
-                            samples.remove(sample)
+                            rng = randint(0, 99)
+                            deathChance = DEATH_RATE/(sample.coolDown)
+                            if rng < deathChance:
+                                samples.remove(sample)
                     for sample in samples:
                         moveSample(sample)
-                    sample = infect(samples)
+                    infect(samples)
         
         sampleRect = []
         for num in range(len(samples)):
