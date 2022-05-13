@@ -13,9 +13,9 @@ simWindow = pygame.Rect(50, 50, 400, 400)
 SAMPLE_COUNT = 500
 IMMUNITY = 100
 INFECT_TIME = 7
-COOL_DOWN_TIME = 5
-DEATH_RATE = 4
-SPREAD_RATE = 70
+COOL_DOWN_TIME = 4
+DEATH_RATE = 50
+SPREAD_RATE = 30
 
 #Color constants
 COLOR_GRAY = (125, 125, 125)
@@ -23,7 +23,7 @@ COLOR_BLACK = (0,0,0)
 COLOR_CYAN = (60, 223, 223)
 COLOR_RED = (255, 0, 0)
 COLOR_BLUE = (0, 0, 255)
-COLOR_GREEN = (0, 255, 0)
+COLOR_YELLOW = (255, 255, 0)
 COLOR_PURPLE = (200, 0, 200)
 
 pygame.display.set_caption("Contagion Sim")
@@ -51,12 +51,18 @@ class Sample:
         if self.stat == Status.NEW_INFECT:
             self.stat =  Status.INFECTED
             self.coolDown = INFECT_TIME
-        elif self.stat == Status.INFECTED or self.stat == Status.COOL_DOWN:
+        elif self.stat == Status.INFECTED:
             self.coolDown -= 1
             if self.coolDown == 0:
-                self.stat = Status.COOL_DOWN
-            elif self.coolDown == COOL_DOWN_TIME * -1:
+                if COOL_DOWN_TIME == 0:
+                    self.stat = Status.CLEAN
+                else:
+                    self.stat = Status.COOL_DOWN
+        elif self.stat == Status.COOL_DOWN:
+            if self.coolDown == -1 * COOL_DOWN_TIME + 1:
                 self.stat = Status.CLEAN
+            else:
+                self.coolDown -= 1
 
 def distance(infectedPos, infecteePos):
     return (sqrt((infectedPos[0]-infecteePos[0]) ** 2 +(infectedPos[1]-infecteePos[1]) ** 2)).real
@@ -131,8 +137,8 @@ def main():
                     for sample in samples:
                         sample.updateSample()
                         if sample.stat == Status.INFECTED:
-                            rng = randint(0, 99)
-                            deathChance = DEATH_RATE/(sample.coolDown)
+                            rng = randint(0, 999)
+                            deathChance = 10 * DEATH_RATE/(sample.coolDown)
                             if rng < deathChance:
                                 samples.remove(sample)
                     for sample in samples:
@@ -153,7 +159,7 @@ def main():
             elif samples[num].stat == Status.IMMUNIZED:
                pygame.Surface.fill(WINDOW, COLOR_CYAN, sampleRect[num])
             elif samples[num].stat == Status.COOL_DOWN:
-               pygame.Surface.fill(WINDOW, COLOR_GREEN, sampleRect[num])
+               pygame.Surface.fill(WINDOW, COLOR_YELLOW, sampleRect[num])
             elif samples[num].stat == Status.NEW_INFECT:
                pygame.Surface.fill(WINDOW, COLOR_PURPLE, sampleRect[num])  
             else:
