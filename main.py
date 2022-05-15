@@ -127,10 +127,13 @@ def buildSamples():
 
 
 def reset():
+    global SIM_NUM
     SIM_NUM = 0
     return buildSamples()
 
 def singleSim(samples):
+    global SIM_NUM
+    SIM_NUM += 1
     for sample in samples:
         sample.updateSample()
         if sample.stat == Status.INFECTED:
@@ -141,7 +144,6 @@ def singleSim(samples):
     for sample in samples:
         moveSample(sample)
     infect(samples)
-    SIM_NUM += 1
     return samples
 
 def visuals(samples):
@@ -207,7 +209,7 @@ def multiSim(samples, visual):
 #Main function
 def main():
     run = True
-    
+
     samples = buildSamples()
     mouse = [-1,-1]
 
@@ -225,7 +227,7 @@ def main():
                 elif 490 <= mousePos[0] <= 660 and 120 <= mousePos[1] <= 170:
                     samples = reset()
                 elif 490 <= mousePos[0] <= 660 and 190 <= mousePos[1] <= 240:
-                    samples = multiSim(samples, True)
+                    samples = multiSim(samples, True, )
         
         visuals(samples)
 
