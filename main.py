@@ -14,10 +14,10 @@ simWindow = pygame.Rect(50, 50, 400, 400)
 #Constants
 SAMPLE_COUNT = 500
 IMMUNITY = 0
-INFECT_TIME = 7
-COOL_DOWN_TIME = 3
-DEATH_RATE = 100
-SPREAD_RATE = 60
+INFECT_TIME = 4
+COOL_DOWN_TIME = 6
+DEATH_RATE = 3
+SPREAD_RATE = 30
 CLOCK = pygame.time.Clock()
 FPS = 50
 MULTI_REPS = 100
@@ -139,7 +139,7 @@ def singleSim(samples):
         sample.updateSample()
         if sample.stat == Status.INFECTED:
             rng = randint(0, 999)
-            deathChance = 10 * DEATH_RATE/(sample.coolDown)
+            deathChance = DEATH_RATE/(INFECT_TIME - sample.coolDown + 1)
             if rng < deathChance:
                 samples.remove(sample)
     for sample in samples:
@@ -206,11 +206,18 @@ def visuals(samples):
     WINDOW.blit(infButtonNum, (infButton.bottomleft[0], infButton.bottomleft[1] - 25))
 
     drButton = pygame.Rect(690,50,170,50)
-    drButtonText = SMALL_FONT.render('Death Rate = ', True, COLOR_WHITE, COLOR_BLACK)
-    drButtonNum = SMALL_FONT.render(str( round(100 * (500 - len(samples))/INFECTIONS, 2)  ), True, COLOR_WHITE, COLOR_BLACK)
+    drButtonText = SMALL_FONT.render('DRate/Infection = ', True, COLOR_WHITE, COLOR_BLACK)
+    drButtonNum = SMALL_FONT.render(str( round(100 * (SAMPLE_COUNT - len(samples))/INFECTIONS, 2)  ), True, COLOR_WHITE, COLOR_BLACK)
     pygame.Surface.fill(WINDOW, COLOR_BLACK, drButton)
     WINDOW.blit(drButtonText, drButton.topleft)
     WINDOW.blit(drButtonNum, (drButton.bottomleft[0], drButton.bottomleft[1] - 25))
+
+    drpButton = pygame.Rect(690,120,170,50)
+    drpButtonText = SMALL_FONT.render('DRate/Pop = ', True, COLOR_WHITE, COLOR_BLACK)
+    drpButtonNum = SMALL_FONT.render(str( round(100 * (SAMPLE_COUNT - len(samples))/SAMPLE_COUNT, 2)  ), True, COLOR_WHITE, COLOR_BLACK)
+    pygame.Surface.fill(WINDOW, COLOR_BLACK, drpButton)
+    WINDOW.blit(drpButtonText, drpButton.topleft)
+    WINDOW.blit(drpButtonNum, (drpButton.bottomleft[0], drpButton.bottomleft[1] - 25))
 
     pygame.display.update()
 
