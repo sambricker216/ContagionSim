@@ -1,13 +1,14 @@
-from audioop import mul
 from cmath import sqrt
 from random import randint, random
 import pygame
+
+pygame.init()
 
 #Window dimensions
 WIDTH, HEIGHT = 900, 500
 WINDOW = pygame.display.set_mode((WIDTH, HEIGHT))
 
- #Sim Window
+#Sim Window
 simWindow = pygame.Rect(50, 50, 400, 400)
 
 #Constants
@@ -20,6 +21,8 @@ SPREAD_RATE = 60
 CLOCK = pygame.time.Clock()
 FPS = 50
 MULTI_REPS = 100
+FONT = pygame.font.Font('Roboto-Black.ttf', 24)
+SIM_NUM = 0
 
 #Color constants
 COLOR_GRAY = (125, 125, 125)
@@ -29,6 +32,7 @@ COLOR_RED = (255, 0, 0)
 COLOR_BLUE = (0, 0, 255)
 COLOR_YELLOW = (255, 255, 0)
 COLOR_PURPLE = (200, 0, 200)
+COLOR_WHITE = (255, 255, 255)
 
 pygame.display.set_caption("Contagion Sim")
 
@@ -123,6 +127,7 @@ def buildSamples():
 
 
 def reset():
+    SIM_NUM = 0
     return buildSamples()
 
 def singleSim(samples):
@@ -136,6 +141,7 @@ def singleSim(samples):
     for sample in samples:
         moveSample(sample)
     infect(samples)
+    SIM_NUM += 1
     return samples
 
 def visuals(samples):
@@ -159,13 +165,31 @@ def visuals(samples):
         else:
             pygame.Surface.fill(WINDOW, COLOR_BLUE, sampleRect[num])
     
-    #Move button
-    moveButton = pygame.Rect(600,100,100,50)
-    resetButton = pygame.Rect(600,200,100,50)
-    multiButton = pygame.Rect(600,300,100,50)
+    #Text Displays
+    moveButton = pygame.Rect(490,50,170,50)
+    moveButtonText = FONT.render('Single Sim', True, COLOR_WHITE, COLOR_BLACK)
     pygame.Surface.fill(WINDOW, COLOR_BLACK, moveButton)
+    WINDOW.blit(moveButtonText, moveButton.topleft)
+
+    resetButton = pygame.Rect(490,120,170,50)
+    resetButtonText = FONT.render('Reset', True, COLOR_WHITE, COLOR_BLACK)
     pygame.Surface.fill(WINDOW, COLOR_BLACK, resetButton)
+    WINDOW.blit(resetButtonText, resetButton.topleft)
+    
+    multiButton = pygame.Rect(490,190,170,50)
+    multiButtonText = FONT.render('Multi Sim', True, COLOR_WHITE, COLOR_BLACK)
     pygame.Surface.fill(WINDOW, COLOR_BLACK, multiButton)
+    WINDOW.blit(multiButtonText, multiButton.topleft)
+
+    popButton = pygame.Rect(490,260,170,50)
+    popButtonText = FONT.render('Pop size = ' + str(len(samples)), True, COLOR_WHITE, COLOR_BLACK)
+    pygame.Surface.fill(WINDOW, COLOR_BLACK, popButton)
+    WINDOW.blit(popButtonText, popButton.topleft)
+
+    simButton = pygame.Rect(490,330,170,50)
+    simButtonText = FONT.render('Sim num = ' + str(SIM_NUM), True, COLOR_WHITE, COLOR_BLACK)
+    pygame.Surface.fill(WINDOW, COLOR_BLACK, simButton)
+    WINDOW.blit(simButtonText, simButton.topleft)
 
     pygame.display.update()
 
@@ -183,7 +207,7 @@ def multiSim(samples, visual):
 #Main function
 def main():
     run = True
-
+    
     samples = buildSamples()
     mouse = [-1,-1]
 
@@ -196,11 +220,11 @@ def main():
                 run = False
             elif event.type == pygame.MOUSEBUTTONUP:
                 mousePos = pygame.mouse.get_pos()
-                if 600 <= mousePos[0] <= 700 and 100 <= mousePos[1] <= 150:
+                if 490 <= mousePos[0] <= 660 and 50 <= mousePos[1] <= 100:
                    samples = singleSim(samples)
-                elif 600 <= mousePos[0] <= 700 and 200 <= mousePos[1] <= 250:
+                elif 490 <= mousePos[0] <= 660 and 120 <= mousePos[1] <= 170:
                     samples = reset()
-                elif 600 <= mousePos[0] <= 700 and 300 <= mousePos[1] <= 350:
+                elif 490 <= mousePos[0] <= 660 and 190 <= mousePos[1] <= 240:
                     samples = multiSim(samples, True)
         
         visuals(samples)
