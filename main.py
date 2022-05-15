@@ -1,4 +1,4 @@
-from cmath import sqrt
+from cmath import sqrt, log
 from random import randint, random
 import pygame
 
@@ -35,6 +35,7 @@ COLOR_BLUE = (0, 0, 255)
 COLOR_YELLOW = (255, 255, 0)
 COLOR_PURPLE = (200, 0, 200)
 COLOR_WHITE = (255, 255, 255)
+COLOR_GREEN = (0, 255, 0)
 
 pygame.display.set_caption("Contagion Sim")
 
@@ -50,6 +51,7 @@ class Sample:
         self.stat = stat
         self.pos = pos
         self.coolDown = 0
+        self.immunity = 0
     
     def changeStat(self, newStat):
         self.stat = newStat
@@ -64,6 +66,7 @@ class Sample:
         elif self.stat == Status.INFECTED:
             self.coolDown -= 1
             if self.coolDown == 0:
+                self.immunity += 1
                 if COOL_DOWN_TIME == 0:
                     self.stat = Status.CLEAN
                 else:
@@ -83,7 +86,7 @@ def infect(sampleList):
         if infector.stat == Status.INFECTED:
             for infectee in sampleList:
                 if infectee.stat == Status.CLEAN:
-                    infectChance = randint(0, 99)
+                    infectChance = (randint(0, 99) * log(infectee.immunity + 4, 4)).real
                     dist = distance(infector.pos, infectee.pos)
                     if (dist < 5 and infectChance < SPREAD_RATE) or (dist < 15 and infectChance < SPREAD_RATE/2) or (dist < 30 and infectChance < SPREAD_RATE/4):
                         infectee.changeStat(Status.NEW_INFECT)
@@ -168,8 +171,13 @@ def visuals(samples):
         elif samples[num].stat == Status.NEW_INFECT:
             pygame.Surface.fill(WINDOW, COLOR_PURPLE, sampleRect[num])  
         else:
-            pygame.Surface.fill(WINDOW, COLOR_BLUE, sampleRect[num])
-    
+            sampleColor = COLOR_BLUE
+            if(20 * samples[num].immunity < 255):
+                sampleColor = (0, COLOR_BLUE[1] + 20 * samples[num].immunity, COLOR_BLUE[2] - 20 * samples[num].immunity)
+            else:
+                sampleColor = COLOR_GREEN
+            pygame.Surface.fill(WINDOW, sampleColor, sampleRect[num])
+
     #Text Displays
     moveButton = pygame.Rect(490,50,170,50)
     moveButtonText = FONT.render('Single Sim', True, COLOR_WHITE, COLOR_BLACK)
