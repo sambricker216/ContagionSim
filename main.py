@@ -1,3 +1,4 @@
+from audioop import mul
 from cmath import sqrt
 from random import randint, random
 import pygame
@@ -14,8 +15,11 @@ SAMPLE_COUNT = 500
 IMMUNITY = 100
 INFECT_TIME = 7
 COOL_DOWN_TIME = 4
-DEATH_RATE = 50
-SPREAD_RATE = 30
+DEATH_RATE = 40
+SPREAD_RATE = 60
+CLOCK = pygame.time.Clock()
+FPS = 50
+MULTI_REPS = 100
 
 #Color constants
 COLOR_GRAY = (125, 125, 125)
@@ -117,6 +121,65 @@ def buildSamples():
     
     return sampleMap
 
+
+def reset():
+    return buildSamples()
+
+def singleSim(samples):
+    for sample in samples:
+        sample.updateSample()
+        if sample.stat == Status.INFECTED:
+            rng = randint(0, 999)
+            deathChance = 10 * DEATH_RATE/(sample.coolDown)
+            if rng < deathChance:
+                samples.remove(sample)
+    for sample in samples:
+        moveSample(sample)
+    infect(samples)
+    return samples
+
+def visuals(samples):
+    sampleRect = []
+    for num in range(len(samples)):
+        sampleRect.append(pygame.Rect(samples[num].pos[0], samples[num].pos[1], 2, 2))
+
+    #Drawing to screen
+    WINDOW.fill(COLOR_GRAY)
+    pygame.Surface.fill(WINDOW, COLOR_BLACK, simWindow)
+
+    for num in range(len(samples)):
+        if samples[num].stat == Status.INFECTED:
+            pygame.Surface.fill(WINDOW, COLOR_RED, sampleRect[num])
+        elif samples[num].stat == Status.IMMUNIZED:
+            pygame.Surface.fill(WINDOW, COLOR_CYAN, sampleRect[num])
+        elif samples[num].stat == Status.COOL_DOWN:
+            pygame.Surface.fill(WINDOW, COLOR_YELLOW, sampleRect[num])
+        elif samples[num].stat == Status.NEW_INFECT:
+            pygame.Surface.fill(WINDOW, COLOR_PURPLE, sampleRect[num])  
+        else:
+            pygame.Surface.fill(WINDOW, COLOR_BLUE, sampleRect[num])
+    
+    #Move button
+    moveButton = pygame.Rect(600,100,100,50)
+    resetButton = pygame.Rect(600,200,100,50)
+    multiButton = pygame.Rect(600,300,100,50)
+    pygame.Surface.fill(WINDOW, COLOR_BLACK, moveButton)
+    pygame.Surface.fill(WINDOW, COLOR_BLACK, resetButton)
+    pygame.Surface.fill(WINDOW, COLOR_BLACK, multiButton)
+
+    pygame.display.update()
+
+def multiSim(samples, visual):
+    
+    for num in range(MULTI_REPS):
+        samples = singleSim(samples)
+        
+        if(visual == True):
+            CLOCK.tick(FPS)
+            visuals(samples)
+    
+    return samples
+
 #Main function
 def main():
     run = True
@@ -134,45 +197,15 @@ def main():
             elif event.type == pygame.MOUSEBUTTONUP:
                 mousePos = pygame.mouse.get_pos()
                 if 600 <= mousePos[0] <= 700 and 100 <= mousePos[1] <= 150:
-                    for sample in samples:
-                        sample.updateSample()
-                        if sample.stat == Status.INFECTED:
-                            rng = randint(0, 999)
-                            deathChance = 10 * DEATH_RATE/(sample.coolDown)
-                            if rng < deathChance:
-                                samples.remove(sample)
-                    for sample in samples:
-                        moveSample(sample)
-                    infect(samples)
+                   samples = singleSim(samples)
+                elif 600 <= mousePos[0] <= 700 and 200 <= mousePos[1] <= 250:
+                    samples = reset()
+                elif 600 <= mousePos[0] <= 700 and 300 <= mousePos[1] <= 350:
+                    samples = multiSim(samples, True)
         
-        sampleRect = []
-        for num in range(len(samples)):
-            sampleRect.append(pygame.Rect(samples[num].pos[0], samples[num].pos[1], 2, 2))
+        visuals(samples)
 
-        #Drawing to screen
-        WINDOW.fill(COLOR_GRAY)
-        pygame.Surface.fill(WINDOW, COLOR_BLACK, simWindow)
-
-        for num in range(len(samples)):
-            if samples[num].stat == Status.INFECTED:
-               pygame.Surface.fill(WINDOW, COLOR_RED, sampleRect[num])
-            elif samples[num].stat == Status.IMMUNIZED:
-               pygame.Surface.fill(WINDOW, COLOR_CYAN, sampleRect[num])
-            elif samples[num].stat == Status.COOL_DOWN:
-               pygame.Surface.fill(WINDOW, COLOR_YELLOW, sampleRect[num])
-            elif samples[num].stat == Status.NEW_INFECT:
-               pygame.Surface.fill(WINDOW, COLOR_PURPLE, sampleRect[num])  
-            else:
-               pygame.Surface.fill(WINDOW, COLOR_BLUE, sampleRect[num])
-        
-        #Move button
-        moveButton = pygame.Rect(600,100,100,50)
-        pygame.Surface.fill(WINDOW, COLOR_BLACK, moveButton)
-
-        pygame.display.update()
-
-        if run is False:
-            print(len(samples))
+    print(len(samples))
     
 #Call main function
 if __name__ == "__main__":
