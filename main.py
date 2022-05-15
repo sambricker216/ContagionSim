@@ -13,16 +13,18 @@ simWindow = pygame.Rect(50, 50, 400, 400)
 
 #Constants
 SAMPLE_COUNT = 500
-IMMUNITY = 100
+IMMUNITY = 0
 INFECT_TIME = 7
-COOL_DOWN_TIME = 4
-DEATH_RATE = 40
+COOL_DOWN_TIME = 3
+DEATH_RATE = 100
 SPREAD_RATE = 60
 CLOCK = pygame.time.Clock()
 FPS = 50
 MULTI_REPS = 100
 FONT = pygame.font.Font('Roboto-Black.ttf', 24)
+SMALL_FONT = pygame.font.Font('Roboto-Black.ttf', 20)
 SIM_NUM = 0
+INFECTIONS = 1
 
 #Color constants
 COLOR_GRAY = (125, 125, 125)
@@ -76,18 +78,16 @@ def distance(infectedPos, infecteePos):
     return (sqrt((infectedPos[0]-infecteePos[0]) ** 2 +(infectedPos[1]-infecteePos[1]) ** 2)).real
 
 def infect(sampleList):
+    global INFECTIONS
     for infector in sampleList:
         if infector.stat == Status.INFECTED:
             for infectee in sampleList:
                 if infectee.stat == Status.CLEAN:
                     infectChance = randint(0, 99)
                     dist = distance(infector.pos, infectee.pos)
-                    if dist < 5 and infectChance < SPREAD_RATE:
+                    if (dist < 5 and infectChance < SPREAD_RATE) or (dist < 15 and infectChance < SPREAD_RATE/2) or (dist < 30 and infectChance < SPREAD_RATE/4):
                         infectee.changeStat(Status.NEW_INFECT)
-                    elif dist < 15 and infectChance < SPREAD_RATE/2:
-                        infectee.changeStat(Status.NEW_INFECT)
-                    elif dist < 30 and infectChance < SPREAD_RATE/4:
-                        infectee.changeStat(Status.NEW_INFECT)
+                        INFECTIONS += 1
 
 def moveSample(sample):
     range = randint(0,3)
@@ -127,8 +127,9 @@ def buildSamples():
 
 
 def reset():
-    global SIM_NUM
+    global SIM_NUM, INFECTIONS
     SIM_NUM = 0
+    INFECTIONS = 1
     return buildSamples()
 
 def singleSim(samples):
@@ -147,6 +148,8 @@ def singleSim(samples):
     return samples
 
 def visuals(samples):
+    global SIM_NUM, INFECTIONS
+
     sampleRect = []
     for num in range(len(samples)):
         sampleRect.append(pygame.Rect(samples[num].pos[0], samples[num].pos[1], 2, 2))
@@ -189,9 +192,25 @@ def visuals(samples):
     WINDOW.blit(popButtonText, popButton.topleft)
 
     simButton = pygame.Rect(490,330,170,50)
-    simButtonText = FONT.render('Sim num = ' + str(SIM_NUM), True, COLOR_WHITE, COLOR_BLACK)
+    simButtonText = SMALL_FONT.render('Sim num = ', True, COLOR_WHITE, COLOR_BLACK)
+    simButtonNum = SMALL_FONT.render(str(SIM_NUM), True, COLOR_WHITE, COLOR_BLACK)
     pygame.Surface.fill(WINDOW, COLOR_BLACK, simButton)
     WINDOW.blit(simButtonText, simButton.topleft)
+    WINDOW.blit(simButtonNum, (simButton.bottomleft[0], simButton.bottomleft[1] - 25))
+
+    infButton = pygame.Rect(490,400,170,50)
+    infButtonText = FONT.render('Infections = ', True, COLOR_WHITE, COLOR_BLACK)
+    infButtonNum = SMALL_FONT.render(str(INFECTIONS), True, COLOR_WHITE, COLOR_BLACK)
+    pygame.Surface.fill(WINDOW, COLOR_BLACK, infButton)
+    WINDOW.blit(infButtonText, infButton.topleft)
+    WINDOW.blit(infButtonNum, (infButton.bottomleft[0], infButton.bottomleft[1] - 25))
+
+    drButton = pygame.Rect(690,50,170,50)
+    drButtonText = SMALL_FONT.render('Death Rate = ', True, COLOR_WHITE, COLOR_BLACK)
+    drButtonNum = SMALL_FONT.render(str( round(100 * (500 - len(samples))/INFECTIONS, 2)  ), True, COLOR_WHITE, COLOR_BLACK)
+    pygame.Surface.fill(WINDOW, COLOR_BLACK, drButton)
+    WINDOW.blit(drButtonText, drButton.topleft)
+    WINDOW.blit(drButtonNum, (drButton.bottomleft[0], drButton.bottomleft[1] - 25))
 
     pygame.display.update()
 
@@ -230,8 +249,6 @@ def main():
                     samples = multiSim(samples, True, )
         
         visuals(samples)
-
-    print(len(samples))
     
 #Call main function
 if __name__ == "__main__":
