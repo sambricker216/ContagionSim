@@ -222,7 +222,7 @@ def visuals(samples):
     WINDOW.blit(infButtonNum, (infButton.bottomleft[0], infButton.bottomleft[1] - 25))
 
     drButton = pygame.Rect(690,50,170,50)
-    drButtonText = SMALL_FONT.render('DRate/Infection = ', True, COLOR_WHITE, COLOR_BLACK)
+    drButtonText = SMALL_FONT.render('Death/Infect % = ', True, COLOR_WHITE, COLOR_BLACK)
     drButtonNum = SMALL_FONT.render(str( round(100 * (SAMPLE_COUNT - len(samples))/INFECTIONS, 2)  ), True, COLOR_WHITE, COLOR_BLACK)
     pygame.Surface.fill(WINDOW, COLOR_BLACK, drButton)
     WINDOW.blit(drButtonText, drButton.topleft)
@@ -265,7 +265,7 @@ def visuals(samples):
     WINDOW.blit(sr_text_button_text, sr_text_button.topleft)
     WINDOW.blit(sr_text_button_val, (sr_text_button.bottomleft[0], sr_text_button.bottomleft[1] - 25))
 
-    pygame.display.update()
+    pygame.display.flip()
 
 def multiSim(samples, visual):
     
