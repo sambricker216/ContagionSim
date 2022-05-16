@@ -13,11 +13,11 @@ simWindow = pygame.Rect(50, 50, 400, 400)
 
 #Constants
 SAMPLE_COUNT = 500
-IMMUNITY = 0
+IMMUNITY = 250
 INFECT_TIME = 4
 COOL_DOWN_TIME = 6
 DEATH_RATE = 3
-SPREAD_RATE = 30
+SPREAD_RATE = 40
 CLOCK = pygame.time.Clock()
 FPS = 50
 MULTI_REPS = 100
@@ -25,6 +25,14 @@ FONT = pygame.font.Font('Roboto-Black.ttf', 24)
 SMALL_FONT = pygame.font.Font('Roboto-Black.ttf', 20)
 SIM_NUM = 0
 INFECTIONS = 1
+
+#INPUT TEXT
+TEXT_SELECT = 0
+IM_TEXT = ""
+INT_TEXT = ""
+CDT_TEXT = ""
+DR_TEXT = ""
+SR_TEXT = ""
 
 #Color constants
 COLOR_GRAY = (125, 125, 125)
@@ -220,12 +228,42 @@ def visuals(samples):
     WINDOW.blit(drButtonText, drButton.topleft)
     WINDOW.blit(drButtonNum, (drButton.bottomleft[0], drButton.bottomleft[1] - 25))
 
-    drpButton = pygame.Rect(690,120,170,50)
-    drpButtonText = SMALL_FONT.render('DRate/Pop = ', True, COLOR_WHITE, COLOR_BLACK)
-    drpButtonNum = SMALL_FONT.render(str( round(100 * (SAMPLE_COUNT - len(samples))/SAMPLE_COUNT, 2)  ), True, COLOR_WHITE, COLOR_BLACK)
-    pygame.Surface.fill(WINDOW, COLOR_BLACK, drpButton)
-    WINDOW.blit(drpButtonText, drpButton.topleft)
-    WINDOW.blit(drpButtonNum, (drpButton.bottomleft[0], drpButton.bottomleft[1] - 25))
+    global IM_TEXT, INT_TEXT, CDT_TEXT, DR_TEXT, SR_TEXT
+
+    im_text_button = pygame.Rect(690,120,170,50)
+    im_text_button_text = SMALL_FONT.render('Immune Count = ', True, COLOR_WHITE, COLOR_BLACK)
+    im_text_button_val = SMALL_FONT.render( IM_TEXT , True, COLOR_WHITE, COLOR_BLACK)
+    pygame.Surface.fill(WINDOW, COLOR_BLACK, im_text_button)
+    WINDOW.blit(im_text_button_text, im_text_button.topleft)
+    WINDOW.blit(im_text_button_val, (im_text_button.bottomleft[0], im_text_button.bottomleft[1] - 25))
+
+    int_text_button = pygame.Rect(690,190,170,50)
+    int_text_button_text = SMALL_FONT.render('Infect Time = ', True, COLOR_WHITE, COLOR_BLACK)
+    int_text_button_val = SMALL_FONT.render( INT_TEXT , True, COLOR_WHITE, COLOR_BLACK)
+    pygame.Surface.fill(WINDOW, COLOR_BLACK, int_text_button)
+    WINDOW.blit(int_text_button_text, int_text_button.topleft)
+    WINDOW.blit(int_text_button_val, (int_text_button.bottomleft[0], int_text_button.bottomleft[1] - 25))
+
+    cd_text_button = pygame.Rect(690,260,170,50)
+    cd_text_button_text = SMALL_FONT.render('Cool Down = ', True, COLOR_WHITE, COLOR_BLACK)
+    cd_text_button_val = SMALL_FONT.render( CDT_TEXT , True, COLOR_WHITE, COLOR_BLACK)
+    pygame.Surface.fill(WINDOW, COLOR_BLACK, cd_text_button)
+    WINDOW.blit(cd_text_button_text, cd_text_button.topleft)
+    WINDOW.blit(cd_text_button_val, (cd_text_button.bottomleft[0], cd_text_button.bottomleft[1] - 25))
+
+    dr_text_button = pygame.Rect(690,330,170,50)
+    dr_text_button_text = SMALL_FONT.render('Mortality = ', True, COLOR_WHITE, COLOR_BLACK)
+    dr_text_button_val = SMALL_FONT.render( DR_TEXT , True, COLOR_WHITE, COLOR_BLACK)
+    pygame.Surface.fill(WINDOW, COLOR_BLACK, dr_text_button)
+    WINDOW.blit(dr_text_button_text, dr_text_button.topleft)
+    WINDOW.blit(dr_text_button_val, (dr_text_button.bottomleft[0], dr_text_button.bottomleft[1] - 25))
+
+    sr_text_button = pygame.Rect(690,400,170,50)
+    sr_text_button_text = SMALL_FONT.render('Spread Rate = ', True, COLOR_WHITE, COLOR_BLACK)
+    sr_text_button_val = SMALL_FONT.render( SR_TEXT , True, COLOR_WHITE, COLOR_BLACK)
+    pygame.Surface.fill(WINDOW, COLOR_BLACK, sr_text_button)
+    WINDOW.blit(sr_text_button_text, sr_text_button.topleft)
+    WINDOW.blit(sr_text_button_val, (sr_text_button.bottomleft[0], sr_text_button.bottomleft[1] - 25))
 
     pygame.display.update()
 
@@ -256,13 +294,81 @@ def main():
                 run = False
             elif event.type == pygame.MOUSEBUTTONUP:
                 mousePos = pygame.mouse.get_pos()
+                global TEXT_SELECT
                 if 490 <= mousePos[0] <= 660 and 50 <= mousePos[1] <= 100:
                    samples = singleSim(samples)
                 elif 490 <= mousePos[0] <= 660 and 120 <= mousePos[1] <= 170:
                     samples = reset()
                 elif 490 <= mousePos[0] <= 660 and 190 <= mousePos[1] <= 240:
-                    samples = multiSim(samples, True, )
-        
+                    samples = multiSim(samples, True)
+                elif 690 <= mousePos[0] <= 860 and 120 <= mousePos[1] <= 170:
+                    TEXT_SELECT = 0
+                elif 690 <= mousePos[0] <= 860 and 190 <= mousePos[1] <= 240:
+                    TEXT_SELECT = 1
+                elif 690 <= mousePos[0] <= 860 and 260 <= mousePos[1] <= 310:
+                    TEXT_SELECT = 2
+                elif 690 <= mousePos[0] <= 860 and 330 <= mousePos[1] <= 380:
+                    TEXT_SELECT = 3
+                elif 690 <= mousePos[0] <= 860 and 400 <= mousePos[1] <= 450:
+                    TEXT_SELECT = 4
+                
+            elif event.type == pygame.KEYUP and (pygame.K_0 <= event.key <= pygame.K_9 or event.key == pygame.K_BACKSPACE):
+                global IM_TEXT, INT_TEXT, CDT_TEXT, DR_TEXT, SR_TEXT, IMMUNITY, INFECT_TIME, COOL_DOWN_TIME, SPREAD_RATE, DEATH_RATE
+                if(TEXT_SELECT == 0):
+                    if event.key == pygame.K_BACKSPACE:
+                        IM_TEXT = IM_TEXT[:-1]
+                    else:
+                        IM_TEXT += event.unicode
+                    
+                    if(len(IM_TEXT) == 0):
+                        IMMUNITY = 0
+                    else:
+                        IMMUNITY = int(IM_TEXT)
+
+                elif(TEXT_SELECT == 1):
+                    if event.key == pygame.K_BACKSPACE:
+                        INT_TEXT = INT_TEXT[:-1]
+                    else:
+                        INT_TEXT += event.unicode
+
+                    if(len(INT_TEXT) == 0):
+                        INFECT_TIME = 0
+                    else:
+                        INFECT_TIME = int(INT_TEXT)
+                    
+                elif(TEXT_SELECT == 2):
+                    if event.key == pygame.K_BACKSPACE:
+                        CDT_TEXT = CDT_TEXT[:-1]
+                    else:
+                        CDT_TEXT += event.unicode
+
+                    if(len(CDT_TEXT) == 0):
+                        COOL_DOWN_TIME = 0
+                    else:
+                        COOL_DOWN_TIME = int(CDT_TEXT)
+
+                elif(TEXT_SELECT == 3):
+                    if event.key == pygame.K_BACKSPACE:
+                        DR_TEXT = DR_TEXT[:-1]
+                    else:
+                        DR_TEXT += event.unicode
+                    
+                    if(len(DR_TEXT) == 0):
+                        DEATH_RATE = 0
+                    else:
+                        DEATH_RATE = int(DR_TEXT)
+
+                elif(TEXT_SELECT == 4):
+                    if event.key == pygame.K_BACKSPACE:
+                        SR_TEXT = SR_TEXT[:-1]
+                    else:
+                        SR_TEXT += event.unicode
+
+                    if(len(SR_TEXT) == 0):
+                        SPREAD_RATE = 0
+                    else:
+                        SPREAD_RATE = int(SR_TEXT)
+
         visuals(samples)
     
 #Call main function
