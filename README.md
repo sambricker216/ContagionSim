@@ -28,5 +28,5 @@
  <li> Adapted: Adapted samples are those that have developed an immunity through repeated exposure. The more often sample is exposed to the virus, the less likely they are to catch it in the future. Adapted samples show their color when they are not in an infected stage. They begin with the Clean blue color and gradient to green as they develop more immunity. </li>
  <li>New Infected: A New Infected sample is one that has just received the virus but is not yet able to spread it or die from it. This best mimic a real life incubation period. The New Infected stage always lasts one round. Newly infected samples have a pink color. </li>
  <li>Infected: An infected sample is one that has the virus. they can both spread it and die from it. The length of this stage is determined by the user. They are red in color. </li>
- <li>Cool Down: Cool Down is the final stage. It represents when a sample finished the Infected stage and has a temporary immunity from catching the virus again. Tje length of this stage is determined by the user. Cool Down samples are yellow. </li>
+ <li>Cool Down: Cool Down is the final stage. It represents when a sample finished the Infected stage and has a temporary immunity from catching the virus again. The length of this stage is determined by the user. Cool Down samples are yellow. </li>
 </ul>
