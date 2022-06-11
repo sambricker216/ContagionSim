@@ -3,7 +3,7 @@
 <p> ContagionSim is a program designed to model the spread of contagious diseases </p>
 
 <h2> Credits </h2>
-<p> This program was written in python and uses the Pygame API for the visual and interactive components.
+<p> This program was written in python and uses the Pygame API for the visual and interactive components. </p>
  
 <h2> Functionality </h2>
 <h3> Setup, Simulating, and Using </h3>
