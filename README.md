@@ -30,3 +30,9 @@
  <li>Infected: An infected sample is one that has the virus. they can both spread it and die from it. The length of this stage is determined by the user. They are red in color. </li>
  <li>Cool Down: Cool Down is the final stage. It represents when a sample finished the Infected stage and has a temporary immunity from catching the virus again. The length of this stage is determined by the user. Cool Down samples are yellow. </li>
 </ul>
+<h3> The Calculations </h3>
+<p> Here are the formulas used to determine various features and events: </p>
+<h4> Infection: </h4>
+<p> The most important part of this simulation is the infection. There are two main factors that affect infections: distance and the probability of an infection. The distance is determined by getting the absolute distance between the infected sample and the target sample. If that value is less than 5, the spread rate is unchanged. If it is between 5 and 15, it is halved. If it is between 15 and 30, it is quartered. Any distance greater than 30 is outside the infection range. Infect chance is based on RNG. The formula is rand(0,99) * log<sub>4</sub>(amount of times infected + 4). An infection occurs if the infection chance is less than the spread rate. Spread rate is a user set variable. The main ideas behind the forumla is that the farther away a target is or the more times its been infected, the lower its chance of infection.</p>
+<h4> Death Chance </h4>
+<p> The other main calculation that has to occur is virus induced death. A death occurs when an rng between 0 and 999 is less than the death chance. Death chance is formualted by $\frac{deathRate}{infect time - coolDown Time + 1}$. The numerator, death rate, is a user determined value. The denominator how much time there is left in the infection. The earlier in the infection, the higher the odds of death. </p>
